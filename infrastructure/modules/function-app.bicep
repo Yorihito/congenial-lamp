@@ -50,6 +50,7 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
     serverFarmId: appServicePlan.id
     httpsOnly: true
     siteConfig: {
+      linuxFxVersion: 'Node|20'
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
@@ -95,6 +96,7 @@ resource functionApp 'Microsoft.Web/sites@2023-01-01' = {
       cors: {
         allowedOrigins: [
           'http://localhost:5173' // Development
+          'https://agreeable-sky-0e737e000.4.azurestaticapps.net' // Production Static Web App
         ]
       }
       minTlsVersion: '1.2'
