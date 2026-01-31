@@ -1,0 +1,374 @@
+{
+    "doc_type": "requirements_spec",
+    "doc_version": "0.1",
+    "language": "ja-JP",
+    "app": {
+        "name": "心の距離マップ",
+        "codename": "koro-map-fb-l2",
+        "tagline": "最近の関わり方の“気配”から、人間関係を距離として眺める。",
+        "platform_targets": [
+            "web",
+            "mobile_web"
+        ],
+        "primary_locale": "ja-JP"
+    },
+    "problem_statement": {
+        "background": "人間関係は数値化しにくいが、ふとした“距離感”の変化を可視化できると内省や会話のきっかけになる。",
+        "user_need": "占い・診断の断定ではなく、根拠が“におう”程度の観測で、関係性の距離を直感的に見たい。",
+        "constraints": [
+            "一般ユーザーが一目で理解できるUI",
+            "プライバシーと規約順守を優先",
+            "SNS内容・個別メッセージの解析は行わない（レベル2：間接・集計のみ）"
+        ]
+    },
+    "goals": [
+        "アプリ起動から5秒以内に“地図”が表示され、意味が直感的に伝わる",
+        "Facebookの行動傾向（集計）を“根拠の気配”として反映",
+        "ユーザーがスクショで共有したくなる見た目と短い文言",
+        "監視・覗き見に見えない設計（個人特定しない、数値を出さない）"
+    ],
+    "non_goals": [
+        "心理学的に正しい診断・精密な分析",
+        "特定人物の行動ログや投稿内容の解析・表示",
+        "DM・メッセンジャー・非公開情報の取得",
+        "「誰が悪い」「戦犯」など対立を煽る機能",
+        "ランキング・スコア・炎上を誘発する煽り表現"
+    ],
+    "target_audience": {
+        "personas": [
+            {
+                "id": "p1",
+                "name": "一般ユーザー（SNS利用者）",
+                "needs": [
+                    "直感的で短時間で理解できる",
+                    "不快・怖さがない",
+                    "共有しても恥ずかしくない"
+                ],
+                "avoid": [
+                    "監視感",
+                    "個人情報の吸い上げ",
+                    "難しい設定"
+                ]
+            },
+            {
+                "id": "p2",
+                "name": "内省・創作好きユーザー",
+                "needs": [
+                    "曖昧さの余白",
+                    "観測っぽさ",
+                    "変化が滲む体験"
+                ],
+                "avoid": [
+                    "占いっぽい断定",
+                    "数字や精度議論"
+                ]
+            }
+        ]
+    },
+    "core_concept": {
+        "two_layer_experience": {
+            "layer1_general_hook": "画面を見た瞬間に『人間関係の距離を地図にしたもの』と分かる",
+            "layer2_plausible_basis": "タップで“観測文”が出て、根拠が少しだけ感じられる（数値なし）"
+        },
+        "design_principles": [
+            "説明しない（UIで長文説明しない）",
+            "数値を出さない（％、スコア、回数、推移グラフ禁止）",
+            "個人特定を避ける（SNS由来で人物名を自動提示しない）",
+            "ユーザー入力を最小に（0〜1操作で地図表示）",
+            "変化はあるが追跡しない（履歴の可視化はしない）"
+        ]
+    },
+    "data_policy": {
+        "sns_source": {
+            "provider": "facebook",
+            "integration_level": "level_2_aggregate_only",
+            "principle": "SNSの内容や特定個人の情報ではなく、ユーザー自身の行動傾向の集計を参照する",
+            "explicitly_not_used": [
+                "投稿本文・画像・動画の内容",
+                "DM/メッセージの内容",
+                "友達の一覧（個人名）",
+                "閲覧履歴（誰の投稿を見たか）",
+                "位置情報"
+            ],
+            "aggregate_signals_candidate": [
+                "直近N日間のリアクション総量（いいね等）",
+                "直近N日間のコメント総量",
+                "直近N日間のコメントされ総量（可能なら）",
+                "投稿アクティビティ総量（可能なら）"
+            ],
+            "note": "Facebook Graph APIの仕様・提供可否は変更され得るため、利用可能な集計シグナルは実装時に最新ドキュメントで確認すること。"
+        },
+        "user_input_data": {
+            "people_labels": {
+                "default_groups": [
+                    "家族",
+                    "友達",
+                    "職場",
+                    "最近よく見かける人"
+                ],
+                "custom_labels": {
+                    "enabled": true,
+                    "constraints": {
+                        "max_items": 12,
+                        "max_label_length": 12,
+                        "disallow_realname_prompt": true,
+                        "disallow_sensitive_fields": [
+                            "住所",
+                            "電話番号",
+                            "メール",
+                            "勤務先の詳細"
+                        ]
+                    }
+                }
+            }
+        },
+        "storage": {
+            "store_locally_by_default": true,
+            "server_storage_minimized": true,
+            "retention": {
+                "local_cache_days": 30,
+                "server_logs_days": 7,
+                "delete_on_disconnect": true
+            },
+            "no_raw_sns_content": true
+        }
+    },
+    "user_experience": {
+        "main_screens": [
+            {
+                "id": "s1",
+                "name": "オンボーディング",
+                "description": "Facebook連携の説明（短い）、許可、スキップ",
+                "ui_copy": {
+                    "title": "心の距離マップ",
+                    "subtitle": "最近の関わり方の気配から、距離を配置します。",
+                    "privacy_line": "投稿内容やメッセージは取得しません。",
+                    "buttons": [
+                        "Facebookで連携",
+                        "連携せずに試す"
+                    ]
+                }
+            },
+            {
+                "id": "s2",
+                "name": "マップ（ホーム）",
+                "description": "中心に“あなた”、周囲にラベル（役割/ニックネーム）、距離と色で配置",
+                "ui_elements": [
+                    "中央ノード",
+                    "周辺ノード（最大12）",
+                    "薄い背景グリッド（任意）",
+                    "更新ボタン（任意）"
+                ],
+                "footer_copy": "いくつかの最近の行動から配置されています。",
+                "interaction": [
+                    "ノードタップで詳細カード",
+                    "長押しでラベル編集（任意）"
+                ]
+            },
+            {
+                "id": "s3",
+                "name": "ノード詳細（観測カード）",
+                "description": "根拠の“におい”を短文で提示。数値は出さない。",
+                "fields": [
+                    "ラベル",
+                    "距離の言い換え（近い/中/遠の言語化）",
+                    "観測文（2〜4行）",
+                    "メモ（任意・ローカルのみ）"
+                ]
+            },
+            {
+                "id": "s4",
+                "name": "設定",
+                "description": "連携のON/OFF、データ削除、表示密度",
+                "options": [
+                    "Facebook連携: on/off",
+                    "ローカルデータ削除",
+                    "最大ノード数: 6/9/12",
+                    "表示モード: ミニマル/ラベル強調",
+                    "更新頻度: 起動時/1日1回/手動"
+                ]
+            }
+        ],
+        "primary_flow": [
+            "アプリ起動",
+            "（初回）オンボーディングでFacebook連携 or スキップ",
+            "即マップ表示",
+            "ノードをタップして観測カードを見る",
+            "必要ならラベル編集",
+            "スクショで共有（任意）"
+        ],
+        "fallback_flow_no_sns": [
+            "Facebook連携なしでも動作",
+            "初期ラベル（家族/友達/職場/最近よく見かける人）を配置",
+            "距離は“軽い質問”または“ランダム寄り”で初期化し、徐々にユーザー操作で滲ませる"
+        ]
+    },
+    "functional_requirements": {
+        "map_generation": {
+            "node_limit": 12,
+            "distance_buckets": [
+                "near",
+                "mid",
+                "far"
+            ],
+            "distance_mapping_rules": [
+                "near: 近い/気楽/考える頻度が高い に寄せる",
+                "mid: 日常の接点はあるが摩擦も少し に寄せる",
+                "far: 低頻度/距離が安定/未整理 に寄せる"
+            ],
+            "layout": {
+                "type": "radial_scatter",
+                "stability": "high",
+                "jitter": {
+                    "enabled": true,
+                    "max_shift_px": 8,
+                    "frequency": "on_refresh_or_daily"
+                }
+            }
+        },
+        "aggregate_signal_to_state": {
+            "window_days_default": 14,
+            "signals": [
+                {
+                    "id": "activity_volume",
+                    "description": "SNS全体の関わり総量（集計）",
+                    "effect": "近距離ゾーンの“賑わい”や色温度を調整（個別人物には直結させない）"
+                }
+            ],
+            "soft_personalization": {
+                "enabled": true,
+                "mechanism": "ユーザーがノードに対して行う軽い操作（近い/遠いの選択、メモ）を学習し、次回配置の揺れ方に反映"
+            }
+        },
+        "observational_copy": {
+            "rules": [
+                "数値・回数・割合を出さない",
+                "断定しない（〜かもしれない/〜寄り を混ぜるが、弱すぎない）",
+                "日常語のみ（心理学用語NG）",
+                "ネガティブ断罪を避ける"
+            ],
+            "templates": [
+                "最近、目にすることが多かった",
+                "反応は少なめ",
+                "会話は生まれていない",
+                "でも存在感はある",
+                "無言でも違和感はない",
+                "距離は安定している",
+                "少し気を使う",
+                "考えが残りやすい"
+            ]
+        },
+        "sharing": {
+            "share_mode": "screenshot_first",
+            "in_app_share": {
+                "enabled": false,
+                "reason": "プラットフォーム差分と炎上リスクを避け、まずはスクショ共有で成立させる"
+            },
+            "watermark": {
+                "enabled": true,
+                "text": "心の距離マップ",
+                "toggle_in_settings": true
+            }
+        }
+    },
+    "privacy_security_compliance": {
+        "permissions": {
+            "facebook_login": true,
+            "requested_scopes_policy": "必要最小限。個別人物・投稿内容にアクセスしない方針で設計。",
+            "note": "具体的なスコープはGraph APIで実現可能な“集計シグナル”に合わせて確定する。"
+        },
+        "safety_measures": [
+            "個人名の自動抽出・推定はしない",
+            "投稿内容・メッセージの取得は禁止",
+            "データ削除（ローカル/サーバ）導線を設定画面に配置",
+            "連携OFFでも利用可能（オプトアウト）"
+        ],
+        "risk_assessment": [
+            {
+                "risk": "監視アプリに見える",
+                "mitigation": [
+                    "UIで『投稿内容やメッセージは取得しない』を明記",
+                    "数値・ランキングを出さない",
+                    "“観測文”は穏当で断罪しない"
+                ]
+            },
+            {
+                "risk": "Facebook API仕様変更で集計が取れない",
+                "mitigation": [
+                    "SNS連携なしのフォールバックをMVPから実装",
+                    "集計シグナルは抽象化レイヤーで差し替え可能にする"
+                ]
+            }
+        ]
+    },
+    "mvp_scope": {
+        "must_have": [
+            "マップ表示（最大12ノード）",
+            "ノード詳細（観測文2〜4行）",
+            "Facebook連携（集計シグナルが取れる範囲）またはフォールバック",
+            "連携せずに試す導線",
+            "ローカルデータ削除",
+            "スクショ共有を前提とした画面レイアウト"
+        ],
+        "should_have": [
+            "ノードラベル編集（役割/ニックネーム）",
+            "表示密度切替（6/9/12）",
+            "更新頻度設定（手動/1日1回）"
+        ],
+        "wont_have_in_mvp": [
+            "履歴・推移グラフ",
+            "特定人物のSNS行動の取得や表示",
+            "高度な推薦（誰が近い等の自動推定）",
+            "SNSへの自動投稿"
+        ]
+    },
+    "future_ideas": {
+        "extensions": [
+            "“心の距離マップ”を週ごとに1枚だけ自動保存（ただし共有は任意）",
+            "“関係の温度”の色テーマ追加",
+            "家族・職場などグループ別マップ切替",
+            "他SNS（ただし同じレベル2方針）への抽象化対応"
+        ],
+        "monetization_options": [
+            {
+                "type": "freemium",
+                "free": [
+                    "基本マップ",
+                    "ノード数6"
+                ],
+                "paid": [
+                    "ノード数12",
+                    "テーマ",
+                    "保存機能（週1枚）",
+                    "広告非表示"
+                ]
+            },
+            {
+                "type": "one_time_purchase",
+                "description": "買い切りでテーマ/保存機能を解放"
+            }
+        ]
+    },
+    "acceptance_criteria": {
+        "ux": [
+            "初回起動から5秒以内にマップが表示される",
+            "説明を読まなくても『人間関係の距離の地図』と理解できる",
+            "数値・割合・ランキングがUIに表示されない"
+        ],
+        "privacy": [
+            "投稿内容・メッセージ内容を取得しない",
+            "人物名をSNSから自動取得・自動表示しない",
+            "設定からデータ削除と連携解除ができる"
+        ],
+        "stability": [
+            "Facebook連携が失敗してもフォールバックで利用継続できる",
+            "マップは毎回大きく崩れず、微小な揺れに留まる"
+        ]
+    },
+    "open_questions_for_implementer": [
+        "Facebook Graph APIで利用可能な“個人特定を避けた集計シグナル”の最終確定（最新仕様確認）",
+        "ログイン許可のスコープ最小化と審査要件",
+        "サーバー側で保持する最小ログの定義（障害解析とプライバシーのバランス）",
+        "スクショ共有時に個人名が含まれ得るラベル入力をどう抑制するか（UI注意喚起/禁止語/伏せ字）"
+    ]
+}
