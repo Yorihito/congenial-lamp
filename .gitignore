@@ -1,0 +1,58 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+
+# Azure Functions
+backend/dist/
+.azure/
+
+# Local settings (contain secrets)
+backend/local.settings.json
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Temporary files
+tmp/
+temp/
+.cache/
+
+# Package lock files (keep one per project)
+# frontend/package-lock.json
+# backend/package-lock.json
+
+# Debugging
+.fusuma/
+*.heapsnapshot
