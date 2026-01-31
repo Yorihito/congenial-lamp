@@ -1,6 +1,6 @@
 import { TableClient, TableServiceClient } from '@azure/data-tables';
 import { User, UserPreferences, DEFAULT_USER_PREFERENCES } from '../models/User';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 
 const connectionString = process.env.TABLE_STORAGE_CONNECTION_STRING || 'UseDevelopmentStorage=true';
 
@@ -15,7 +15,7 @@ export function getUsersTableClient(): TableClient {
 
 export async function createUser(azureAdOid: string, facebookUserId?: string, locale: string = 'ja-JP'): Promise<User> {
     const tableClient = getUsersTableClient();
-    const userId = uuidv4();
+    const userId = randomUUID();
     const now = new Date();
 
     const user: User = {

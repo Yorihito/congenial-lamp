@@ -1,6 +1,6 @@
 import { MapNode, MapGenerateRequest, MapGenerateResponse, DEFAULT_LABELS, DISTANCE_COLORS } from '../models/MapNode';
 import { SignalData, DEFAULT_SIGNALS } from '../models/AggregateSignal';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 
 // Observation text templates (no numbers, per requirements)
 const OBSERVATION_TEMPLATES = {
@@ -154,7 +154,7 @@ export function generateMap(
     });
 
     return {
-        mapId: uuidv4(),
+        mapId: randomUUID(),
         generatedAt: new Date().toISOString(),
         nodes,
         basis: {
